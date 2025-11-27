@@ -554,4 +554,21 @@
             const type = typeSelect.value;
             const date = dateInput.value;
 
-            if (!description || isNaN(amount) || amount <= 0 || !date)
+            if (!description || isNaN(amount) || !date) {
+                alert("Preencha descrição, valor e data corretamente.");
+                return;
+            }
+
+            if (editingIndex >= 0) {
+                // Editar transação existente
+                transactions[editingIndex] = {
+                    description,
+                    amount: Math.abs(amount),
+                    type,
+                    date,
+                };
+            } else {
+                // Adicionar nova transação
+                transactions.push({
+                    description,
+                    amount: Math.abs
