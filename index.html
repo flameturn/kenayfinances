@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KenayFinances - Controle Pessoal</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            background: #020617;
+            color: #1f2933;
+        }
+
+        /* Background usando a imagem enviada */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url("0_AU3rmB08Vntf33Is.jpg") no-repeat center center / cover;
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: #f9fafb;
+            padding: 28px 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        /* “Gif”/faixa tecnológica no topo (simulação com gradiente + ícone) */
+        .tech-strip {
+            margin-top: 14px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #0ea5e9, #22c55e, #6366f1);
+            color: #0b1120;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .tech-strip span.icon {
+            font-size: 1rem;
+        }
+
+        .balances {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            padding: 24px;
+            background: #f9fafb;
+        }
+
+        .balance-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 18px 16px;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .balance-card h3 {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .balance-card .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .positive {
+            color: #16a34a;
+        }
+
+        .negative {
+            color: #dc2626;
+        }
+
+        .add-section {
+            padding: 0 24px 22px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .add-section p {
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        button.add-btn {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        button.add-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.45);
+        }
+
+        .transactions {
+            padding: 0 24px 24px 24px;
+        }
+
+        .transactions h2 {
+            margin-bottom: 14px;
+            color: #111827;
+            font-size: 1.1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .income {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .expense {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .edit-btn,
+        .remove-btn {
+            border: none;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 8px;
+        }
+
+        .edit-btn:hover {
+            color: #2563eb;
+        }
+
+        .remove-btn:hover {
+            color: #ef4444;
+        }
+
+        .empty-msg {
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 14px 10px;
+            color: #9ca3af;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 22px 20px;
+            width: 100%;
+            max-width: 430px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 14px;
+            font-size: 1.2rem;
+            color: #111827;
+        }
+
+        .field-group {
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .field-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #4b5563;
+        }
+
+        .modal input,
+        .modal select {
+            width: 100%;
+            padding: 10px 9px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .modal input:focus,
+        .modal select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 1px #2563eb33;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .modal button {
+            border: none;
+            padding: 9px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .modal button.save {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+        .modal button.cancel {
+            background: #9ca3af;
+            color: #111827;
+        }
+
+        .modal button.save:hover {
+            background: #15803d;
+        }
+
+        .modal button.cancel:hover {
+            background: #6b7280;
+            color: #f9fafb;
+        }
+
+        @media (max-width: 768px) {
+            .balances {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>KenayFinances</h1>
+            <p>Organize suas finanças pessoais de forma simples e visual.</p>
+            <div class="tech-strip">
+                <span class="icon">💸</span>
+                <span>Dinheiro + Código = Controle total</span>
+            </div>
+        </header>
+
+        <section class="balances">
+            <div class="balance-card">
+                <h3>Entradas</h3>
+                <div id="income" class="value positive">R$ 0,00</div>
+            </div>
+            <div class="balance-card">
+                <h3>Saídas</h3>
+                <div id="expense" class="value negative">R$ 0,00</div>
+            </div>
+            <div class="balance-card">
+                <h3>Saldo total</h3>
+                <div id="total" class="value">R$ 0,00</div>
+            </div>
+        </section>
+
+        <section class="add-section">
+            <p>Cadastre novas transações para visualizar seu fluxo de caixa.</p>
+            <button class="add-btn" id="openModalBtn">+ Nova transação</button>
+        </section>
+
+        <section class="transactions">
+            <h2>Transações</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Tipo</th>
+                        <th>Data</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsBody">
+                    <!-- Linhas criadas via JS -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="transactionModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nova transação</h2>
+
+            <div class="field-group">
+                <label for="description">Descrição</label>
+                <input type="text" id="description" placeholder="Ex: Salário, Mercado..." />
+            </div>
+
+            <div class="field-group">
+                <label for="amount">Valor</label>
+                <input type="number" id="amount" step="0.01" placeholder="Use números positivos" />
+            </div>
+
+            <div class="field-group">
+                <label for="type">Tipo</label>
+                <select id="type">
+                    <option value="income">Entrada</option>
+                    <option value="expense">Saída</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label for="date">Data</label>
+                <input type="date" id="date" />
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="cancelBtn">Cancelar</button>
+                <button class="save" id="saveBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "kenayfinances_transactions";
+
+        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let editingIndex = -1; // Índice da transação sendo editada (-1 para nova)
+
+        const incomeEl = document.getElementById("income");
+        const expenseEl = document.getElementById("expense");
+        const totalEl = document.getElementById("total");
+        const tbody = document.getElementById("transactionsBody");
+
+        const modal = document.getElementById("transactionModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const openModalBtn = document.getElementById("openModalBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const saveBtn = document.getElementById("saveBtn");
+
+        const descriptionInput = document.getElementById("description");
+        const amountInput = document.getElementById("amount");
+        const typeSelect = document.getElementById("type");
+        const dateInput = document.getElementById("date");
+
+        function formatCurrency(value) {
+            return value.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+            });
+        }
+
+        function openModal(isEditing = false, index = -1) {
+            modal.style.display = "flex";
+            editingIndex = index;
+            if (isEditing && index >= 0) {
+                const t = transactions[index];
+                modalTitle.textContent = "Editar transação";
+                descriptionInput.value = t.description;
+                amountInput.value = t.amount;
+                typeSelect.value = t.type;
+                dateInput.value = t.date;
+            } else {
+                modalTitle.textContent = "Nova transação";
+                dateInput.valueAsDate = new Date();
+            }
+            descriptionInput.focus();
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            descriptionInput.value = "";
+            amountInput.value = "";
+            typeSelect.value = "income";
+            dateInput.value = "";
+            editingIndex = -1;
+        }
+
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        }
+
+        function updateBalances() {
+            const income = transactions
+                .filter((t) => t.type === "income")
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const expense = transactions
+                .filter((t) => t.type === "expense")
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const total = income - expense;
+
+            incomeEl.textContent = formatCurrency(income);
+            expenseEl.textContent = formatCurrency(expense);
+            totalEl.textContent = formatCurrency(total);
+            totalEl.classList.toggle("positive", total >= 0);
+            totalEl.classList.toggle("negative", total < 0);
+        }
+
+        function renderTransactions() {
+            tbody.innerHTML = "";
+
+            if (transactions.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 5;
+                cell.className = "empty-msg";
+                cell.textContent = "Nenhuma transação cadastrada ainda.";
+                row.appendChild(cell);
+                tbody.appendChild(row);
+                updateBalances();
+                return;
+            }
+
+            transactions.forEach((t, index) => {
+                const row = document.createElement("tr");
+
+                const descTd = document.createElement("td");
+                descTd.textContent = t.description;
+
+                const valueTd = document.createElement("td");
+                valueTd.textContent = formatCurrency(t.amount);
+
+                const typeTd = document.createElement("td");
+                typeTd.textContent = t.type === "income" ? "Entrada" : "Saída";
+                typeTd.className = t.type === "income" ? "income" : "expense";
+
+                const dateTd = document.createElement("td");
+                const dateObj = new Date(t.date);
+                if (!isNaN(dateObj.getTime())) {
+                    dateTd.textContent = dateObj.toLocaleDateString("pt-BR");
+                } else {
+                    dateTd.textContent = "-";
+                }
+
+                const actionsTd = document.createElement("td");
+                const editBtn = document.createElement("button");
+                editBtn.className = "edit-btn";
+                editBtn.innerHTML = "✏️";
+                editBtn.title = "Editar";
+                editBtn.addEventListener("click", () => openModal(true, index));
+
+                const removeBtn = document.createElement("button");
+                removeBtn.className = "remove-btn";
+                removeBtn.innerHTML = "✕";
+                removeBtn.title = "Remover";
+                removeBtn.addEventListener("click", () => removeTransaction(index));
+
+                actionsTd.appendChild(editBtn);
+                actionsTd.appendChild(removeBtn);
+
+                row.appendChild(descTd);
+                row.appendChild(valueTd);
+                row.appendChild(typeTd);
+                row.appendChild(dateTd);
+                row.appendChild(actionsTd);
+
+                tbody.appendChild(row);
+            });
+
+            updateBalances();
+        }
+
+        function addOrEditTransaction() {
+            const description = descriptionInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const type = typeSelect.value;
+            const date = dateInput.value;
+
+            if (!description || isNaN(amount) || !date) {
+                alert("Preencha descrição, valor e data corretamente.");
+                return;
+            }
+
+            if (editingIndex >= 0) {
+                // Editar transação existente
+                transactions[editingIndex] = {
+                    description,
+                    amount: Math.abs(amount),
+                    type,
+                    date,
+                };
+            } else {
+                // Adicionar nova transação
+                transactions.push({
+                    description,
+                    amount: Math.abs
